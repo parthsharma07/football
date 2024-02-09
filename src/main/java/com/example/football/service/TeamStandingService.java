@@ -1,5 +1,6 @@
 package com.example.football.service;
 
+import com.example.football.constants.LeagueIdConstants;
 import com.example.football.model.StandingRequest;
 import com.example.football.model.StandingResponse;
 import com.example.football.model.TeamEntity;
@@ -37,12 +38,22 @@ public class TeamStandingService {
     @Value("${api.base.url}")
     private String apiUrl;
 
+    @Value("${api.key}")
+    private String apiKey;
+
     public void setTeamEntityHashMap() {
         RestTemplate restTemplate = new RestTemplate();
         ParameterizedTypeReference<List<TeamEntity>> responseType = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<TeamEntity>> responseEntity = restTemplate.exchange(apiUrl, HttpMethod.GET, null, responseType);
-        List<TeamEntity> teamEntities = responseEntity.getBody();
-        for(TeamEntity teamEntity: teamEntities){
+        ResponseEntity<List<TeamEntity>> responseEntity1 = restTemplate.exchange(apiUrl + LeagueIdConstants.PREMIER_LEAGUE + apiKey, HttpMethod.GET, null, responseType);
+        List<TeamEntity> teamEntities1 = responseEntity1.getBody();
+        ResponseEntity<List<TeamEntity>> responseEntity2 = restTemplate.exchange(apiUrl + LeagueIdConstants.NON_LEAGUE_PREMIER + apiKey, HttpMethod.GET, null, responseType);
+        List<TeamEntity> teamEntities2 = responseEntity2.getBody();
+        assert teamEntities1 != null;
+        for(TeamEntity teamEntity: teamEntities1){
+            teamEntityHashMap.put(teamEntity.getTeam_name(), teamEntity);
+        }
+        assert teamEntities2 != null;
+        for(TeamEntity teamEntity: teamEntities2){
             teamEntityHashMap.put(teamEntity.getTeam_name(), teamEntity);
         }
     }
@@ -54,8 +65,9 @@ public class TeamStandingService {
             if(isApiOnline){
                 RestTemplate restTemplate = new RestTemplate();
                 Object returnModel;
+                String leagueId = standingRequest.getLeagueName().equals("Premier League") ? LeagueIdConstants.PREMIER_LEAGUE : (standingRequest.getLeagueName().equals("Non League Premier") ? LeagueIdConstants.NON_LEAGUE_PREMIER : "");
                 ParameterizedTypeReference<List<TeamEntity>> responseType = new ParameterizedTypeReference<>() {};
-                ResponseEntity<List<TeamEntity>> responseEntity = restTemplate.exchange(apiUrl, HttpMethod.GET, null, responseType);
+                ResponseEntity<List<TeamEntity>> responseEntity = restTemplate.exchange(apiUrl + leagueId + apiKey, HttpMethod.GET, null, responseType);
                 List<TeamEntity> teamEntities = responseEntity.getBody();
                 for(TeamEntity teamEntity: teamEntities){
                     if(teamEntity.getTeam_name().equals(standingRequest.getTeamName()) && teamEntity.getCountry_name().equals(standingRequest.getCountryName()) && teamEntity.getLeague_name().equals(standingRequest.getLeagueName())){
@@ -83,7 +95,7 @@ public class TeamStandingService {
     private StandingResponse setStandingResponse(TeamEntity teamEntity){
         StandingResponse standingResponse = new StandingResponse();
         standingResponse.setCountry_name(teamEntity.getCountry_name());
-        standingResponse.setCountry_id("1");
+        standingResponse.setCountry_id("44");
         standingResponse.setLeague_name(teamEntity.getLeague_name());
         standingResponse.setLeague_id(teamEntity.getLeague_id());
         standingResponse.setTeam_name(teamEntity.getTeam_name());
@@ -94,12 +106,13 @@ public class TeamStandingService {
         return standingResponse;
     }
 
-    public List<TeamEntity> getAllStandings() throws Exception{
+    public List<TeamEntity> getAllStandings(String leagueName) throws Exception{
         List<TeamEntity> teamEntities = null;
+        String leagueId = leagueName.equals("Premier League") ? LeagueIdConstants.PREMIER_LEAGUE : (leagueName.equals("Non League Premier") ? LeagueIdConstants.NON_LEAGUE_PREMIER : "");
         try{
             RestTemplate restTemplate = new RestTemplate();
             ParameterizedTypeReference<List<TeamEntity>> responseType = new ParameterizedTypeReference<>() {};
-            ResponseEntity<List<TeamEntity>> responseEntity = restTemplate.exchange(apiUrl, HttpMethod.GET, null, responseType);
+            ResponseEntity<List<TeamEntity>> responseEntity = restTemplate.exchange(apiUrl + leagueId + apiKey, HttpMethod.GET, null, responseType);
             teamEntities = responseEntity.getBody();
         }catch (Exception e){
             throw e;

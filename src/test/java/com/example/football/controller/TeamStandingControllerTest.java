@@ -47,9 +47,9 @@ public class TeamStandingControllerTest {
 
         List<TeamEntity> teamEntities = Arrays.asList(teamEntity1, teamEntity2);
 
-        when(teamStandingService.getAllStandings()).thenReturn(teamEntities);
+        when(teamStandingService.getAllStandings("test")).thenReturn(teamEntities);
 
-        List<TeamEntity> result = teamStandingController.getAllStandings();
+        List<TeamEntity> result = teamStandingController.getAllStandings("test");
 
         assertEquals(teamEntities, result);
     }

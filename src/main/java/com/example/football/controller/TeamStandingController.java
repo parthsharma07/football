@@ -30,10 +30,10 @@ public class TeamStandingController {
 
     @GetMapping(value = "/allStandings")
     @ResponseBody
-    public List<TeamEntity> getAllStandings(){
+    public List<TeamEntity> getAllStandings(@RequestParam(name = "leagueName") String leagueName){
         List<TeamEntity> teamEntities = null;
         try {
-            teamEntities = teamStandingService.getAllStandings();
+            teamEntities = teamStandingService.getAllStandings(leagueName);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -55,7 +55,7 @@ public class TeamStandingController {
         try {
             standingResponse = teamStandingService.getStandingResponse(standingRequest);
             resource = EntityModel.of(standingResponse);
-            WebMvcLinkBuilder linkTo= linkTo(methodOn(this.getClass()).getAllStandings());
+            WebMvcLinkBuilder linkTo= linkTo(methodOn(this.getClass()).getAllStandings(leagueName));
             resource.add(linkTo.withRel("all-team-standings"));
         }catch (Exception e){
             throw new ApplicationException("400",e.getMessage());
